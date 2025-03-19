@@ -9,7 +9,7 @@ namespace FocusVibe.Server.Models
         public int SessionId { get; set; }
 
         public int Rating { get; set; }
-        public string Comments { get; set; } = string.Empty;
+        public string Comment { get; set; } = string.Empty;
 
         [ForeignKey("SessionId")]
         public FocusSession FocusSession { get; set; } = null!;

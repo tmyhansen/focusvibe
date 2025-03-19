@@ -12,7 +12,7 @@ namespace FocusVibe.Server.Data
         public DbSet<UserPreference> UserPreferences { get; set; }
         public DbSet<FocusSession> FocusSessions { get; set; }
         public DbSet<Distraction> Distractions { get; set; }
-        public DbSet<SessionFeedback> SessionFeedbacks { get; set; }
+        public DbSet<SessionFeedback> SessionFeedback { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

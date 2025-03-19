@@ -8,9 +8,9 @@ namespace FocusVibe.Server.Models
         [Key]
         public int UserId { get; set; }
 
-        public bool EnableNotifications { get; set; } = true;
-        public int WorkTime { get; set; } = 25;
-        public int BreakTime { get; set; } = 5;
+        public bool NotificationEnabled { get; set; } = true;
+        public int PreferredWorkTime { get; set; } = 25;
+        public int PreferredBreakTime { get; set; } = 5;
 
         [ForeignKey("UserId")]
         public User User { get; set; } = null!;

@@ -13,7 +13,7 @@ namespace FocusVibe.Server.Models
 
         [Required]
         [MaxLength(255)]
-        public string Description { get; set; } = string.Empty;
+        public string DistractionType { get; set; } = string.Empty;
 
         public DateTime Timestamp { get; set; } = DateTime.UtcNow;
 
