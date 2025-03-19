@@ -1,6 +1,6 @@
 @FocusVibe.Server_HostAddress = http://localhost:5122
 
-GET {{FocusVibe.Server_HostAddress}}/weatherforecast/
+GET {{FocusVibe.Server_HostAddress}}/focusvibe/
 Accept: application/json
 
 ###

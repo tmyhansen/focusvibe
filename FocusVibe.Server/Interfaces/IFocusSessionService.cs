@@ -4,10 +4,10 @@ namespace FocusVibe.Server.Interfaces
 {
     public interface IFocusSessionService
     {
-        FocusSession GetCurrentSession();
-        FocusSession StartSession(int motivationLevel);
-        FocusSession GetSessionById(int sessionId);
-        FocusSession EndSession(int sessionId);
-        UserProgress GetUserProgress();
+        Task<FocusSession?> GetCurrentSessionAsync();
+        Task<FocusSession> StartSessionAsync(int userId, int motivationLevel);
+        Task<FocusSession?> GetSessionByIdAsync(int sessionId);
+        Task<FocusSession?> EndSessionAsync(int sessionId);
+        Task<UserProgress> GetUserProgressAsync(int userId);
     }
 }

@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("FocusVibe.Server")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+419ae09ce302506f48c04d16353f89302a2d45f1")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d58239bd7f46cb1912bbd59c2f014bb751ab8662")]
 [assembly: System.Reflection.AssemblyProductAttribute("FocusVibe.Server")]
 [assembly: System.Reflection.AssemblyTitleAttribute("FocusVibe.Server")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

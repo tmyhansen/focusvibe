@@ -1,5 +1,7 @@
+using FocusVibe.Server.Data;
 using FocusVibe.Server.Interfaces;
 using FocusVibe.Server.Services;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,7 +12,12 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+);
+
 builder.Services.AddScoped<IFocusSessionService, FocusSessionService>();
+builder.Services.AddScoped<IUserService, UserService>();
 //TODO: builder.Services.AddScoped<IMotivationService, MotivationService>();
 
 var app = builder.Build();

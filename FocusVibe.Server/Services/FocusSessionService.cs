@@ -1,55 +1,68 @@
 ﻿using FocusVibe.Server.Interfaces;
 using FocusVibe.Server.Models;
+using FocusVibe.Server.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace FocusVibe.Server.Services
 {
     public class FocusSessionService : IFocusSessionService
     {
-        private readonly List<FocusSession> _sessions = new List<FocusSession>();
+        private readonly ApplicationDbContext _context;
 
-        public FocusSession GetCurrentSession()
+        public FocusSessionService(ApplicationDbContext context)
         {
-            return _sessions.LastOrDefault(s => s.Status == FocusSessionStatus.InProgress);
+            _context = context;
         }
 
-        public FocusSession StartSession(int motivationLevel)
+        public async Task<FocusSession?> GetCurrentSessionAsync()
+        {
+            return await _context.FocusSessions
+                .OrderByDescending(s => s.StartTime)
+                .FirstOrDefaultAsync(s => s.Status == FocusSessionStatus.InProgress);
+        }
+
+        public async Task<FocusSession> StartSessionAsync(int userId, int motivationLevel)
         {
             var session = new FocusSession
             {
-                Id = _sessions.Count + 1,
+                UserId = userId,
                 MotivationLevel = motivationLevel,
                 Status = FocusSessionStatus.InProgress,
-                StartTime = DateTime.Now,
+                StartTime = DateTime.UtcNow,
                 WorkTime = 25,
                 BreakTime = 5
             };
 
-            _sessions.Add(session);
+            _context.FocusSessions.Add(session);
+            await _context.SaveChangesAsync();
             return session;
         }
 
-        public FocusSession GetSessionById(int sessionId)
+        public async Task<FocusSession?> GetSessionByIdAsync(int sessionId)
         {
-            return _sessions.FirstOrDefault(s => s.Id == sessionId);
+            return await _context.FocusSessions.FindAsync(sessionId);
         }
 
-        public FocusSession EndSession(int sessionId)
+        public async Task<FocusSession?> EndSessionAsync(int sessionId)
         {
-            var session = _sessions.FirstOrDefault(s => s.Id == sessionId);
+            var session = await _context.FocusSessions.FindAsync(sessionId);
             if (session != null)
             {
                 session.Status = FocusSessionStatus.Completed;
-                session.EndTime = DateTime.Now;
+                session.EndTime = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
             }
             return session;
         }
 
-        public UserProgress GetUserProgress()
+        public async Task<UserProgress> GetUserProgressAsync(int userId)
         {
+            var sessions = await _context.FocusSessions.Where(s => s.UserId == userId).ToListAsync();
+
             return new UserProgress
             {
-                TotalFocusTime = _sessions.Sum(s => s.WorkTime),
-                TotalSessions = _sessions.Count,
+                TotalFocusTime = sessions.Sum(s => s.WorkTime),
+                TotalSessions = sessions.Count,
                 CurrentStreak = 5,
                 MaxStreak = 10
             };

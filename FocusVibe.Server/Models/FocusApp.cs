@@ -1,23 +1,46 @@
+using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
+
 namespace FocusVibe.Server.Models
 {
     public class FocusApp
     {
-        public FocusSession CurrentSession { get; set; }
-
-        public string MotivationTip { get; set; }
-
-        public UserProgress UserProgress { get; set; }
+        public FocusSession? CurrentSession { get; set; }
+        public string MotivationTip { get; set; } = string.Empty;
+        public UserProgress? UserProgress { get; set; }
     }
 
     public class FocusSession
     {
+        [Key]
         public int Id { get; set; }
+
+        [Required]
+        public int UserId { get; set; }
+
+        [Required]
         public int MotivationLevel { get; set; }
+
+        [Required]
         public int WorkTime { get; set; }
+
+        [Required]
         public int BreakTime { get; set; }
+
+        [Required]
         public DateTime StartTime { get; set; }
-        public DateTime EndTime { get; set; }
-        public FocusSessionStatus Status { get; set; }
+
+        public DateTime? EndTime { get; set; }
+
+        [Required]
+        public FocusSessionStatus Status { get; set; } = FocusSessionStatus.Pending;
+
+        [ForeignKey("UserId")]
+        public User User { get; set; } = null!;
+
+        public ICollection<Distraction> Distractions { get; set; } = new List<Distraction>();
+
+        public SessionFeedback? SessionFeedback { get; set; }
     }
 
     public class UserProgress
