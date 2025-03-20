@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import Form from "../components/Form";
+import { useAuth } from "../contexts/AuthContext";
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { isLoggedIn, setIsLoggedIn } = useAuth();
 
   const handleLoginClick = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
