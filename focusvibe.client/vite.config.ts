@@ -35,7 +35,6 @@ if (!fs.existsSync(certFilePath) || !fs.existsSync(keyFilePath)) {
 
 const target = 'http://localhost:5122';
 
-// https://vitejs.dev/config/
 export default defineConfig({
     plugins: [plugin()],
     css: {
@@ -48,12 +47,12 @@ export default defineConfig({
     },
     server: {
         proxy: {
-            '/api/focusapp': {
+            '/api/': {
                 target: target,
                 changeOrigin: true, 
                 secure: false
             }
         },
-        port: parseInt(env.DEV_SERVER_PORT || '55720'), 
+        port: 5130, 
     }
 });

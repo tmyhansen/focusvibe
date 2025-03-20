@@ -1,7 +1,11 @@
-﻿using FocusVibe.Server.Data;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using FocusVibe.Server.Data;
 using FocusVibe.Server.Interfaces;
 using FocusVibe.Server.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace FocusVibe.Server.Services
 {
@@ -20,6 +24,14 @@ namespace FocusVibe.Server.Services
                 .Include(u => u.UserPreference)
                 .Include(u => u.FocusSessions)
                 .FirstOrDefaultAsync(u => u.Id == userId);
+        }
+
+        public async Task<User?> GetUserByEmailAsync(string email)
+        {
+            return await _context.Users
+                .Include(u => u.UserPreference)
+                .Include(u => u.FocusSessions)
+                .FirstOrDefaultAsync(u => u.Email == email);
         }
 
         public async Task<List<User>> GetAllUsersAsync()

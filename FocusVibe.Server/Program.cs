@@ -1,3 +1,4 @@
+using FocusVibe.Server.Config;
 using FocusVibe.Server.Data;
 using FocusVibe.Server.Interfaces;
 using FocusVibe.Server.Services;
@@ -18,7 +19,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddScoped<IFocusSessionService, FocusSessionService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 //TODO: builder.Services.AddScoped<IMotivationService, MotivationService>();
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 
 var app = builder.Build();
 
