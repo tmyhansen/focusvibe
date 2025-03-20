@@ -122,7 +122,7 @@ namespace FocusVibe.Server.Controllers
             return Ok(user);
         }
 
-        [HttpPost("register")]
+        [HttpPost("sign-up")]
         public async Task<IActionResult> RegisterUserAsync([FromBody] UserRegistrationRequest request)
         {
             if (string.IsNullOrEmpty(request.Username) || string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.Password))
