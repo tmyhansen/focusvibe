@@ -108,11 +108,61 @@ namespace FocusVibe.Server.Controllers
             var progress = await _focusSessionService.GetUserProgressAsync(userId);
             return Ok(progress);
         }
+
+        [HttpGet("user/{id}")]
+        public async Task<IActionResult> GetUserById(int id)
+        {
+            var user = await _userService.GetUserByIdAsync(id);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(user);
+        }
+
+        [HttpPost("register")]
+        public async Task<IActionResult> RegisterUserAsync([FromBody] UserRegistrationRequest request)
+        {
+            if (string.IsNullOrEmpty(request.Username) || string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.Password))
+            {
+                return BadRequest("Username, Email, and PasswordHash are required");
+            }
+
+            try
+            {
+                //TODO: Add more security and checks; probably minimum 8 characters including number, upper and lower. Time to crack this will be 9.5 years. 
+                var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
+
+                var user = new User
+                {
+                    Username = request.Username,
+                    Email = request.Email,
+                    PasswordHash = passwordHash
+                };
+
+                var createdUser = await _userService.CreateUserAsync(user);
+
+                return CreatedAtAction(nameof(GetUserById), new { id = createdUser.Id }, createdUser);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error registering user: {ex.Message}");
+            }
+        }
     }
 
     public class FocusSessionRequest
     {
         public int UserId { get; set; }
         public int MotivationLevel { get; set; }
+    }
+
+    public class UserRegistrationRequest
+    {
+        public required string Username { get; set; }
+        public required string Email { get; set; }
+        public required string Password { get; set; }
     }
 }
