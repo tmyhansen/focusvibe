@@ -30,6 +30,32 @@ namespace FocusVibe.Server.Controllers
             return Ok(user);
         }
 
+        [HttpGet("check-auth")]
+        public IActionResult CheckAuth()
+        {
+            var token = Request.Cookies["auth_token"];
+            if (string.IsNullOrEmpty(token))
+            {
+                return Unauthorized("No token provided");
+            }
+
+            try
+            {
+                var user = _authService.ValidateToken(token);
+                if (user == null)
+                {
+                    return Unauthorized("Invalid or expired token");
+                }
+
+                return Ok(new { message = "Authenticated", username = user.Username });
+            }
+            catch (Exception ex)
+            {
+                return Unauthorized($"Token validation failed: {ex.Message}");
+            }
+        }
+
+
         [HttpPost("login")]
         public async Task<IActionResult> LoginUserAsync([FromBody] UserLoginRequest request)
         {
@@ -52,11 +78,34 @@ namespace FocusVibe.Server.Controllers
                     return Unauthorized("Invalid email or password");
                 }
 
-                return Ok(new { token });
+                Response.Cookies.Append("auth_token", token, new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = false,  //TODO: set true when https is configured
+                    SameSite = SameSiteMode.Strict,
+                    Expires = DateTime.UtcNow.AddHours(12)
+                });
+
+                return Ok();
             }
             catch (Exception ex)
             {
                 return BadRequest($"Error logging in user: {ex.Message}");
+            }
+        }
+
+        [HttpPost("logout")]
+        public IActionResult Logout()
+        {
+            try
+            {
+                Response.Cookies.Delete("auth_token");
+
+                return Ok("Logged out");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error logging out user: {ex.Message}");
             }
         }
 

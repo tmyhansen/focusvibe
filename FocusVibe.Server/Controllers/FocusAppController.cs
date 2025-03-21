@@ -53,12 +53,9 @@ namespace FocusVibe.Server.Controllers
         [HttpPost("session/start")]
         public async Task<IActionResult> StartFocusSessionAsync([FromBody] FocusSessionRequest request)
         {
-            if (request.UserId <= 0)
-            {
-                return BadRequest("Invalid user ID.");
-            }
+            var token = Request.Cookies["auth_token"];
 
-            var user = await _userService.GetUserByIdAsync(request.UserId);
+            var user = _userService.GetCurrentUser(token);
             if (user == null)
             {
                 return NotFound("User not found.");
@@ -69,7 +66,7 @@ namespace FocusVibe.Server.Controllers
                 return BadRequest("Motivation level must be between 1 and 10.");
             }
 
-            var session = await _focusSessionService.StartSessionAsync(request.UserId, request.MotivationLevel);
+            var session = await _focusSessionService.StartSessionAsync(user.Id, request.MotivationLevel);
             return Ok(new { sessionId = session.Id });
         }
 

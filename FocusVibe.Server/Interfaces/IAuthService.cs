@@ -5,5 +5,6 @@ namespace FocusVibe.Server.Interfaces
     public interface IAuthService
     {
         Task<string?> AuthenticateUser(string email, string password);
+        public User? ValidateToken(string token);
     }
 }

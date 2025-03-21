@@ -1,6 +1,7 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Azure.Core;
 using FocusVibe.Server.Data;
 using FocusVibe.Server.Interfaces;
 using FocusVibe.Server.Models;
@@ -12,10 +13,16 @@ namespace FocusVibe.Server.Services
     public class UserService : IUserService
     {
         private readonly ApplicationDbContext _context;
+        private readonly IAuthService _authService;
 
-        public UserService(ApplicationDbContext context)
+        public UserService(ApplicationDbContext context, IAuthService authService)
         {
             _context = context;
+            _authService = authService;
+        }
+        public User? GetCurrentUser(string token)
+        {
+            return _authService.ValidateToken(token);
         }
 
         public async Task<User?> GetUserByIdAsync(int userId)
@@ -29,8 +36,6 @@ namespace FocusVibe.Server.Services
         public async Task<User?> GetUserByEmailAsync(string email)
         {
             return await _context.Users
-                .Include(u => u.UserPreference)
-                .Include(u => u.FocusSessions)
                 .FirstOrDefaultAsync(u => u.Email == email);
         }
 

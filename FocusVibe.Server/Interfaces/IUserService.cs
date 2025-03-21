@@ -4,6 +4,7 @@ namespace FocusVibe.Server.Interfaces
 {
     public interface IUserService
     {
+        User? GetCurrentUser(string token);
         Task<User?> GetUserByIdAsync(int userId);
         Task<User?> GetUserByEmailAsync(string email);
         Task<List<User>> GetAllUsersAsync();

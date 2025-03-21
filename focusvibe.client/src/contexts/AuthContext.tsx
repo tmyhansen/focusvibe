@@ -12,12 +12,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
 
     useEffect(() => {
-        const token = localStorage.getItem("token");
-        setIsLoggedIn(!!token);
+        const checkAuthentication = async () => {
+            try {
+                const response = await fetch("/api/auth/check-auth", {
+                    method: "GET",
+                    credentials: "include",
+                });
+
+                if (response.ok) {
+                    setIsLoggedIn(true);
+                } else {
+                    setIsLoggedIn(false);
+                }
+            } catch (error) {
+                setIsLoggedIn(false);
+            }
+        };
+
+        checkAuthentication();
     }, []);
 
     const logout = () => {
-        localStorage.removeItem("token");
+        fetch("/api/auth/logout", {
+            method: "POST",
+            credentials: "include",
+        });
+
         setIsLoggedIn(false);
     };
 

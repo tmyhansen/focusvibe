@@ -25,10 +25,6 @@ const Login: React.FC = () => {
         alert("Failed to login");
       }
 
-      const data = await response.json();
-
-      localStorage.setItem("token", data.token);
-
       setIsLoggedIn(true);
     } catch (error) {
       setError("An error occurred");

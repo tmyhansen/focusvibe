@@ -35,6 +35,44 @@ namespace FocusVibe.Server.Services
             return GenerateJwtToken(user);
         }
 
+        public User? ValidateToken(string token)
+        {
+            try
+            {
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var key = Encoding.UTF8.GetBytes(_jwtSettings.SecretKey);
+
+                var validationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = _jwtSettings.Issuer,
+                    ValidAudience = _jwtSettings.Audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(key)
+                };
+
+                var principal = tokenHandler.ValidateToken(token, validationParameters, out var validatedToken);
+
+                var userIdClaim = principal.FindFirst(ClaimTypes.NameIdentifier);
+                if (userIdClaim == null)
+                {
+                    return null;
+                }
+
+                var userId = int.Parse(userIdClaim.Value);
+                var user = _context.Users.FirstOrDefault(u => u.Id == userId);
+
+                return user;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+
         private string GenerateJwtToken(User user)
         {
             var claims = new[]
