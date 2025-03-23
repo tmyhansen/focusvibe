@@ -1,6 +1,7 @@
 using FocusVibe.Server.Interfaces;
 using FocusVibe.Server.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace FocusVibe.Server.Controllers
 {
@@ -10,13 +11,15 @@ namespace FocusVibe.Server.Controllers
     {
         private readonly IFocusSessionService _focusSessionService;
         private readonly IUserService _userService;
+        private readonly IHubContext<LiveUpdateHub> _hubContext;
         //TODO: private readonly IMotivationService _motivationService;
 
         //TODO: public FocusAppController(IFocusSessionService focusSessionService, IMotivationService motivationService, IUserService userService)
-        public FocusAppController(IFocusSessionService focusSessionService, IUserService userService)
+        public FocusAppController(IFocusSessionService focusSessionService, IUserService userService, IHubContext<LiveUpdateHub> hubContext)
         {
             _focusSessionService = focusSessionService;
             _userService = userService;
+            _hubContext = hubContext;
             //TODO: _motivationService = motivationService;
         }
 
@@ -67,6 +70,12 @@ namespace FocusVibe.Server.Controllers
             }
 
             var session = await _focusSessionService.StartSessionAsync(user.Id, request.MotivationLevel);
+
+            await _hubContext.Clients.All.SendAsync("ReceiveUpdate", "FocusSessionStarted", new
+            {
+                Username = user.Username,
+            });
+
             return Ok(new { sessionId = session.Id });
         }
 

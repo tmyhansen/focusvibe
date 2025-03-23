@@ -7,6 +7,16 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("CorsPolicy", builder =>
+    {
+        builder.WithOrigins("http://localhost:5130")
+               .AllowAnyHeader()
+               .AllowAnyMethod()
+               .AllowCredentials();
+    });
+});
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -23,10 +33,18 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 //TODO: builder.Services.AddScoped<IMotivationService, MotivationService>();
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 
+builder.Services.AddSignalR();
+
 var app = builder.Build();
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
+
+
+
+app.UseCors("CorsPolicy");
+
+app.MapHub<LiveUpdateHub>("/liveUpdateHub");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
