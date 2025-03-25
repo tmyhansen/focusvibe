@@ -43,10 +43,12 @@ const Form: React.FC<FormProps> = ({ title, inputs, errorMessage, buttonText, on
                 onChange={input.onChange}
                 className={inputClass}
                 required={input.required}
+                aria-invalid={!!errorMessage}
+                aria-describedby={errorMessage ?? "form error"}
               />
             </div>
           ))}
-          {errorMessage && <div className={errorMessageClass}>{errorMessage}</div>}
+          {errorMessage && <div className={errorMessageClass} aria-live="assertive">{errorMessage}</div>}
           <button type="submit" className={buttonClass}>
             {buttonText}
           </button>

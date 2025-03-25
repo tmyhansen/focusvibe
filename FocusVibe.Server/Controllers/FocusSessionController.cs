@@ -7,7 +7,7 @@ namespace FocusVibe.Server.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class FocusAppController : ControllerBase
+    public class FocusSessionController : ControllerBase
     {
         private readonly IFocusSessionService _focusSessionService;
         private readonly IUserService _userService;
@@ -15,7 +15,7 @@ namespace FocusVibe.Server.Controllers
         //TODO: private readonly IMotivationService _motivationService;
 
         //TODO: public FocusAppController(IFocusSessionService focusSessionService, IMotivationService motivationService, IUserService userService)
-        public FocusAppController(IFocusSessionService focusSessionService, IUserService userService, IHubContext<LiveUpdateHub> hubContext)
+        public FocusSessionController(IFocusSessionService focusSessionService, IUserService userService, IHubContext<LiveUpdateHub> hubContext)
         {
             _focusSessionService = focusSessionService;
             _userService = userService;

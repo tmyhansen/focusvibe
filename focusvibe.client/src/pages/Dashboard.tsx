@@ -90,9 +90,10 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className={containerClass}>
+      <h1 className={`${titleClass} sr-only`}>Dashboard</h1>
       <div className={columnClass}>
         <div className={profileCardClass}>
-          <img src={profileData.profilePic} alt="Profile" className={profilePicClass} />
+          <img src={profileData.profilePic} alt={`${profileData.username}'s profile picture`} className={profilePicClass} />
           <h2 className={usernameClass}>{profileData.username}</h2>
           <div className={statsContainerClass}>
             <div className={statBoxClass}>
@@ -114,10 +115,11 @@ const Dashboard: React.FC = () => {
       <div className={centerColumnClass}>
         {isLoggedIn ? (
           <>
-            <h1 className={titleClass}>Session</h1>
+            <h2 className={titleClass}>Session</h2>
             <div className="w-full">
-              <label className={labelClass}>Current motivation level (1-10):</label>
+              <label htmlFor="motivationLevel" className={labelClass}>Current motivation level (1-10):</label>
               <input
+                id="motivationLevel"
                 type="number"
                 value={motivationLevel}
                 onChange={(e) => setMotivationLevel(Number(e.target.value))}
@@ -129,8 +131,8 @@ const Dashboard: React.FC = () => {
             <button onClick={handleStartSession} className={`${buttonClass} ${startButtonClass}`}>
               Start focus session
             </button>
-            {sessionId && <p className={successMessageClass}>Session started. Session ID: {sessionId}</p>}
-            {errorMessage && <p className={messageClass}>{errorMessage}</p>}
+            {sessionId && <p className={successMessageClass} aria-live="polite">Session started. Session ID: {sessionId}</p>}
+            {errorMessage && <p className={messageClass} aria-live="assertive">{errorMessage}</p>}
           </>
         ) : (
           <p className={loggedOutTextClass}>You're logged out</p>
@@ -138,8 +140,8 @@ const Dashboard: React.FC = () => {
       </div>
 
       <div className={columnClass}>
-        <h2 className="text-lg font-semibold text-gray-600">Preferences</h2>
-        <button onClick={enableNotifications} className={`${buttonClass} ${notifyButtonClass}`}>
+        <h2 className={titleClass}>Preferences</h2>
+        <button onClick={enableNotifications} className={`${buttonClass} ${notifyButtonClass}`} aria-label="Enable notifications for focus session updates">
               Enable notifications
         </button>
         <button onClick={logout} className={`${buttonClass} ${logoutButtonClass}`}>
