@@ -1,8 +1,13 @@
 import { useEffect, useState } from "react";
 import * as signalR from "@microsoft/signalr";
 
-const useSignalR = () => {
-    const [sessionData, setSessionData] = useState<any>(null);
+interface SessionUser {
+    id: number;
+    username: string;
+}
+
+const useSessionsSignalR = () => {
+    const [sessionsData, setSessionsData] = useState<SessionUser[]>([]);
 
     useEffect(() => {
         const connection = new signalR.HubConnectionBuilder()
@@ -11,13 +16,12 @@ const useSignalR = () => {
             .build();
 
         connection.start()
-            .then(() => console.log("Connected toSignalR hub"))
+            .then(() => console.log("Connected to SignalR hub for sessions"))
             .catch(err => console.error("SignalR connection error: ", err));
 
-        connection.on("ReceiveUpdate", (eventType, data) => {
-            console.log(`Received event: ${eventType}`, data);
-            if (eventType === "FocusSessionStarted") {
-                setSessionData(data);
+        connection.on("ReceiveSessionsUpdate", (eventType, data) => {
+            if (eventType === "SessionsUpdate") {
+                setSessionsData(data);
             }
         });
 
@@ -26,7 +30,7 @@ const useSignalR = () => {
         };
     }, []);
 
-    return sessionData;
+    return sessionsData;
 };
 
-export default useSignalR;
+export default useSessionsSignalR;

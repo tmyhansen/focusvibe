@@ -86,7 +86,7 @@ namespace FocusVibe.Server.Controllers
                     Expires = DateTime.UtcNow.AddHours(12)
                 });
 
-                return Ok();
+                return Ok( new { userId = user.Id, username = user.Username });
             }
             catch (Exception ex)
             {

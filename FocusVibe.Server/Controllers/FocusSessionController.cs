@@ -23,31 +23,32 @@ namespace FocusVibe.Server.Controllers
             //TODO: _motivationService = motivationService;
         }
 
-        //TODO: SessionController
         [HttpGet("session/current")]
         public async Task<IActionResult> GetCurrentSessionAsync()
         {
-            var focusSession = await _focusSessionService.GetCurrentSessionAsync();
-            if (focusSession == null)
-            {
-                return NotFound();
-            }
+            var token = Request.Cookies["auth_token"];
 
-            var user = await _userService.GetUserByIdAsync(focusSession.UserId);
+            var user = _userService.GetCurrentUser(token);
             if (user == null)
             {
                 return NotFound("User not found.");
+            }
+
+            var focusSession = await _focusSessionService.GetCurrentSessionAsync(user.Id);
+            if (focusSession == null)
+            {
+                return NotFound();
             }
 
             //TODO: var motivationTip = await _motivationService.GetMotivationTipAsync(focusSession.MotivationLevel);
 
             var response = new
             {
-                focusSession,
-                userPreferences = user.UserPreference,
-                distractions = focusSession.Distractions,
-                sessionFeedback = focusSession.SessionFeedback,
-                //TODO: motivationTip
+                sessionId = focusSession.Id,
+                startTime = focusSession.StartTime,
+                plannedDuration = focusSession.WorkTime,
+                selectedTask = focusSession.Task,
+                motivationLevel = focusSession.MotivationLevel
             };
 
             return Ok(response);
@@ -69,14 +70,14 @@ namespace FocusVibe.Server.Controllers
                 return BadRequest("Motivation level must be between 1 and 10.");
             }
 
-            var session = await _focusSessionService.StartSessionAsync(user.Id, request.MotivationLevel);
+            var session = await _focusSessionService.StartSessionAsync(user.Id, request.MotivationLevel, request.PlannedDuration, request.SelectedTask);
 
             await _hubContext.Clients.All.SendAsync("ReceiveUpdate", "FocusSessionStarted", new
             {
                 Username = user.Username,
             });
-
-            return Ok(new { sessionId = session.Id });
+            
+            return Ok(new { sessionId = session.Id, startTime = session.StartTime, plannedDuration = session.WorkTime,  selectedTask = session.Task, motivationLevel = session.MotivationLevel});
         }
 
         [HttpGet("session/{sessionId}")]
@@ -119,7 +120,8 @@ namespace FocusVibe.Server.Controllers
 
     public class FocusSessionRequest
     {
-        public int UserId { get; set; }
         public int MotivationLevel { get; set; }
+        public int PlannedDuration { get; set; }
+        public string SelectedTask { get; set; } = "Not defined";
     }
 }

@@ -33,7 +33,7 @@ namespace FocusVibe.Server.Models
         public DateTime? EndTime { get; set; }
 
         [Required]
-        public FocusSessionStatus Status { get; set; } = FocusSessionStatus.Pending;
+        public int Status { get; set; } = 2;
 
         [ForeignKey("UserId")]
         public User User { get; set; } = null!;
@@ -41,6 +41,7 @@ namespace FocusVibe.Server.Models
         public ICollection<Distraction> Distractions { get; set; } = new List<Distraction>();
 
         public SessionFeedback? SessionFeedback { get; set; }
+        public string Task { get; set; } = "";
     }
 
     public class UserProgress

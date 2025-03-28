@@ -30,7 +30,7 @@ namespace FocusVibe.Server.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Description")
+                    b.Property<string>("DistractionType")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
@@ -71,6 +71,10 @@ namespace FocusVibe.Server.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
+                    b.Property<string>("Task")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
@@ -84,12 +88,38 @@ namespace FocusVibe.Server.Migrations
                     b.ToTable("FocusSessions");
                 });
 
+            modelBuilder.Entity("FocusVibe.Server.Models.Follower", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("FollowedId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("FollowerId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FollowedId");
+
+                    b.HasIndex("FollowerId");
+
+                    b.ToTable("Followers");
+                });
+
             modelBuilder.Entity("FocusVibe.Server.Models.SessionFeedback", b =>
                 {
                     b.Property<int>("SessionId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Comments")
+                    b.Property<string>("Comment")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -98,7 +128,7 @@ namespace FocusVibe.Server.Migrations
 
                     b.HasKey("SessionId");
 
-                    b.ToTable("SessionFeedbacks");
+                    b.ToTable("SessionFeedback");
                 });
 
             modelBuilder.Entity("FocusVibe.Server.Models.User", b =>
@@ -136,13 +166,13 @@ namespace FocusVibe.Server.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
-                    b.Property<int>("BreakTime")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("EnableNotifications")
+                    b.Property<bool>("NotificationEnabled")
                         .HasColumnType("bit");
 
-                    b.Property<int>("WorkTime")
+                    b.Property<int>("PreferredBreakTime")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PreferredWorkTime")
                         .HasColumnType("int");
 
                     b.HasKey("UserId");
@@ -170,6 +200,25 @@ namespace FocusVibe.Server.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("FocusVibe.Server.Models.Follower", b =>
+                {
+                    b.HasOne("FocusVibe.Server.Models.User", "FollowedUser")
+                        .WithMany()
+                        .HasForeignKey("FollowedId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("FocusVibe.Server.Models.User", "FollowerUser")
+                        .WithMany()
+                        .HasForeignKey("FollowerId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("FollowedUser");
+
+                    b.Navigation("FollowerUser");
                 });
 
             modelBuilder.Entity("FocusVibe.Server.Models.SessionFeedback", b =>

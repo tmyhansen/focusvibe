@@ -32,13 +32,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         checkAuthentication();
     }, []);
 
-    const logout = () => {
-        fetch("/api/auth/logout", {
-            method: "POST",
-            credentials: "include",
-        });
-
-        setIsLoggedIn(false);
+    const logout = async () => {
+        try {
+            const response = await fetch("/api/auth/logout", {
+                method: "POST",
+                credentials: "include",
+            });
+    
+            if (response.ok) {
+                setIsLoggedIn(false);
+            }
+        } catch (error) {
+            console.error("Logout failed", error);
+        }
     };
 
     return (

@@ -2,39 +2,49 @@
 using FocusVibe.Server.Models;
 using FocusVibe.Server.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.SignalR;
 
 namespace FocusVibe.Server.Services
 {
     public class FocusSessionService : IFocusSessionService
     {
         private readonly ApplicationDbContext _context;
+        private readonly IUserService _userService;
+        private readonly IHubContext<LiveUpdateHub> _hubContext;
 
-        public FocusSessionService(ApplicationDbContext context)
+        public FocusSessionService(ApplicationDbContext context, IUserService userService, IHubContext<LiveUpdateHub> hubContext)
         {
             _context = context;
+            _userService = userService;
+            _hubContext = hubContext;
         }
 
-        public async Task<FocusSession?> GetCurrentSessionAsync()
+        public async Task<FocusSession?> GetCurrentSessionAsync(int userId)
         {
+            await UpdateSessionsOnClients();
             return await _context.FocusSessions
+                .Where(s => s.UserId == userId && s.EndTime == null)
                 .OrderByDescending(s => s.StartTime)
-                .FirstOrDefaultAsync(s => s.Status == FocusSessionStatus.InProgress);
+                .FirstOrDefaultAsync();
         }
 
-        public async Task<FocusSession> StartSessionAsync(int userId, int motivationLevel)
+        public async Task<FocusSession> StartSessionAsync(int userId, int motivationLevel, int plannedDuration, string selectedTask)
         {
             var session = new FocusSession
             {
                 UserId = userId,
                 MotivationLevel = motivationLevel,
-                Status = FocusSessionStatus.InProgress,
+                Status = 2,
                 StartTime = DateTime.UtcNow,
-                WorkTime = 25,
-                BreakTime = 5
+                WorkTime = plannedDuration,
+                BreakTime = 5,
+                Task = selectedTask
             };
 
             _context.FocusSessions.Add(session);
             await _context.SaveChangesAsync();
+
+            await UpdateSessionsOnClients();
             return session;
         }
 
@@ -48,11 +58,19 @@ namespace FocusVibe.Server.Services
             var session = await _context.FocusSessions.FindAsync(sessionId);
             if (session != null)
             {
-                session.Status = FocusSessionStatus.Completed;
+                session.Status = 4;
                 session.EndTime = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
             }
+
+            await UpdateSessionsOnClients();
             return session;
+        }
+
+        private async Task UpdateSessionsOnClients()
+        {
+            var sessions = await _userService.GetUsersWithOpenSessionsAsync();
+            await _hubContext.Clients.All.SendAsync("ReceiveSessionsUpdate", "SessionsUpdate", sessions); //TODO: move out + model
         }
 
         public async Task<UserProgress> GetUserProgressAsync(int userId)

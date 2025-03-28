@@ -13,6 +13,7 @@ namespace FocusVibe.Server.Data
         public DbSet<FocusSession> FocusSessions { get; set; }
         public DbSet<Distraction> Distractions { get; set; }
         public DbSet<SessionFeedback> SessionFeedback { get; set; }
+        public DbSet<Follower> Followers { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -25,9 +26,14 @@ namespace FocusVibe.Server.Data
                 .HasForeignKey<UserPreference>(up => up.UserId);
 
             modelBuilder.Entity<FocusSession>()
+                .Property(f => f.Status)
+                .HasConversion<int>();
+
+            modelBuilder.Entity<FocusSession>()
                 .HasOne(fs => fs.User)
                 .WithMany(u => u.FocusSessions)
                 .HasForeignKey(fs => fs.UserId);
+
 
             modelBuilder.Entity<Distraction>()
                 .HasOne(d => d.FocusSession)
@@ -38,6 +44,18 @@ namespace FocusVibe.Server.Data
                 .HasOne(sf => sf.FocusSession)
                 .WithOne(fs => fs.SessionFeedback)
                 .HasForeignKey<SessionFeedback>(sf => sf.SessionId);
+
+            modelBuilder.Entity<Follower>()
+                .HasOne(f => f.FollowerUser)
+                .WithMany()
+                .HasForeignKey(f => f.FollowerId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Follower>()
+                .HasOne(f => f.FollowedUser)
+                .WithMany()
+                .HasForeignKey(f => f.FollowedId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

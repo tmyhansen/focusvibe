@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Text;
 using Azure.Core;
 using FocusVibe.Server.Data;
+using FocusVibe.Server.DTOs;
 using FocusVibe.Server.Interfaces;
 using FocusVibe.Server.Models;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +24,22 @@ namespace FocusVibe.Server.Services
         public User? GetCurrentUser(string token)
         {
             return _authService.ValidateToken(token);
+        }
+
+        public async Task<UserDto?> GetUserDetailsAsync(int userId)
+        {
+            var user = await _context.Users
+                .Where(u => u.Id == userId)
+                .Select(u => new UserDto
+                {
+                    Username = u.Username,
+                    FollowersAmount = _context.Followers.Count(f => f.FollowedId == userId),
+                    FollowingAmount = _context.Followers.Count(f => f.FollowerId == userId),
+                    SessionsAmount = _context.FocusSessions.Count(fs => fs.UserId == userId)
+                })
+                .FirstOrDefaultAsync();
+
+            return user;
         }
 
         public async Task<User?> GetUserByIdAsync(int userId)
@@ -77,5 +94,67 @@ namespace FocusVibe.Server.Services
             await _context.SaveChangesAsync();
             return true;
         }
+
+        public async Task<bool> FollowUserAsync(int followerId, int followedId)
+        {
+            if (followerId == followedId)
+            {
+                return false;
+            }
+
+            var existingFollow = await _context.Followers
+                .FirstOrDefaultAsync(f => f.FollowerId == followerId && f.FollowedId == followedId);
+
+            if (existingFollow != null)
+            {
+                return false;
+            }
+
+            var follow = new Follower
+            {
+                FollowerId = followerId,
+                FollowedId = followedId,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.Followers.Add(follow);
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
+        public async Task<bool> UnfollowUserAsync(int followerId, int followedId)
+        {
+            var follow = await _context.Followers
+                .FirstOrDefaultAsync(f => f.FollowerId == followerId && f.FollowedId == followedId);
+
+            if (follow == null)
+            {
+                return false;
+            }
+
+            _context.Followers.Remove(follow);
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
+        public async Task<IEnumerable<User>> GetUsersWithOpenSessionsAsync()
+        {
+            var usersWithOpenSessions = await _context.FocusSessions
+                .Where(fs => fs.EndTime == null)
+                .Join(_context.Users, fs => fs.UserId, u => u.Id, (fs, u) => new { u.Id, u.Username })
+                .Distinct()
+                .ToListAsync();
+
+            var users = usersWithOpenSessions.Select(u => new User
+            {
+                Id = u.Id,
+                Username = u.Username
+            }).ToList();
+
+            return users;
+        }
+
     }
 }
