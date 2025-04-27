@@ -3,7 +3,6 @@ import { Dispatch } from "redux";
 import { SessionData } from "../types/sessionTypes";
 import { AppDispatch, RootState } from "../store";
 import { useSelector } from "react-redux";
-import { fetchUserData } from "./userService";
 
 export const startSessionRequest = async (
     motivationLevel: number,

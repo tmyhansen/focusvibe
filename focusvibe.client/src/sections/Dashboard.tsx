@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import useNotificationSignalR from "../hooks/useNotificationSignalR";
 import useSessionsSignalR from "../hooks/useSessionsSignalR";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../store";
@@ -15,7 +14,6 @@ const Dashboard: React.FC = () => {
   const { isLoggedIn, logout } = useAuth();
   const [errorMessage, setErrorMessage] = useState("");
   const [isNotificationPermissionGranted, setIsNotificationPermissionGranted] = useState<boolean>(false);
-  const notificationData = useNotificationSignalR();
   const allSessionsData = useSessionsSignalR();
 
   const dispatch = useDispatch();
